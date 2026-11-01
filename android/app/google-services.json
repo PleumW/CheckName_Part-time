@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "489256214674",
+    "project_id": "kitatokiofrashy",
+    "storage_bucket": "kitatokiofrashy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:489256214674:android:5ebe1a2a9bb7bb7a0fc64b",
+        "android_client_info": {
+          "package_name": "com.catcafe.kitatokiofrashy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJVLa3hbMWSB2C13JHOEOdflWl82au4UY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

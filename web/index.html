@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="ระบบบันทึกเวลาทำงานและสวัสดิการพนักงาน ChcekName">
+  <meta name="theme-color" content="#7A6C5D">
+
+  <!-- iOS / Mobile full screen & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ChcekName">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Preconnect to CDNs & Firebase APIs for maximum performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com">
+  <link rel="preconnect" href="https://firestore.googleapis.com">
+  <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+
+  <!-- Preload fonts and bootstrap for instant loading -->
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" href="flutter_bootstrap.js" as="script">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>ChcekName</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    html {
+      height: 100%;
+      width: 100%;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      overflow: hidden;
+      background-color: #FDFBF7;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #FFFFFF 0%, #FDFBF7 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999999;
+      transition: opacity 0.35s ease-out;
+      box-sizing: border-box;
+    }
+    #loading-screen * {
+      box-sizing: border-box;
+    }
+    .loader-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 24px;
+      max-width: 320px;
+    }
+    .logo-container {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background-color: #FFFFFF;
+      box-shadow: 0 10px 25px rgba(122, 108, 93, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      animation: pulse-paw 2.2s infinite ease-in-out;
+      overflow: hidden;
+    }
+    .logo-container img {
+      width: 96px;
+      height: 96px;
+      object-fit: cover;
+    }
+    .brand-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #7A6C5D;
+      margin: 0 0 6px 0;
+      letter-spacing: -0.5px;
+    }
+    .brand-subtitle {
+      font-size: 14px;
+      color: #A89F91;
+      margin: 0 0 24px 0;
+      font-weight: 500;
+    }
+    .spinner-bar {
+      width: 120px;
+      height: 4px;
+      background: rgba(122, 108, 93, 0.15);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .spinner-bar::after {
+      content: '';
+      position: absolute;
+      left: -40%;
+      width: 40%;
+      height: 100%;
+      background: #7A6C5D;
+      border-radius: 4px;
+      animation: bar-slide 1.2s infinite ease-in-out;
+    }
+    @keyframes pulse-paw {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 10px 25px rgba(122, 108, 93, 0.18);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 14px 30px rgba(122, 108, 93, 0.28);
+      }
+    }
+    @keyframes bar-slide {
+      0% { left: -40%; }
+      50% { left: 40%; width: 50%; }
+      100% { left: 100%; width: 40%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Instant HTML/CSS Splash Screen (Displays in ~50ms, prevents blank white screen) -->
+  <div id="loading-screen">
+    <div class="loader-box">
+      <div class="logo-container">
+        <img src="icons/Icon-192.png" alt="ChcekName Cat Paw Logo" />
+      </div>
+      <h1 class="brand-title">ChcekName</h1>
+      <p class="brand-subtitle">Staff & Schedule Management</p>
+      <div class="spinner-bar"></div>
+    </div>
+  </div>
+
+  <script>
+    // Register Service Worker for true OS push / system notifications
+    function registerAppServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js', { scope: '/' })
+          .then(function(reg) {
+            console.log('[SW] ServiceWorker registered with scope:', reg.scope);
+          })
+          .catch(function(err) {
+            console.warn('[SW] ServiceWorker registration failed:', err);
+          });
+      }
+    }
+    if (document.readyState === 'complete') {
+      registerAppServiceWorker();
+    } else {
+      window.addEventListener('load', registerAppServiceWorker);
+    }
+
+    // Pure Web Audio API Chime Synthesizer with iOS AudioContext Auto-Unlock
+    var sharedAudioCtx = null;
+
+    function unlockAudioOnGesture() {
+      try {
+        var AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        if (!sharedAudioCtx) {
+          sharedAudioCtx = new AudioContext();
+        }
+        if (sharedAudioCtx.state === 'suspended') {
+          sharedAudioCtx.resume();
+        }
+        // Play 1-sample silent sound buffer to authorize audio on iOS WebKit
+        if (sharedAudioCtx.state === 'running' || sharedAudioCtx.state === 'suspended') {
+          var buffer = sharedAudioCtx.createBuffer(1, 1, 22050);
+          var source = sharedAudioCtx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(sharedAudioCtx.destination);
+          source.start(0);
+        }
+      } catch (e) {}
+    }
+
+    // Attach unlock listeners on first user interactions (essential for iOS Safari)
+    window.addEventListener('touchstart', unlockAudioOnGesture, { passive: true });
+    window.addEventListener('touchend', unlockAudioOnGesture, { passive: true });
+    window.addEventListener('click', unlockAudioOnGesture);
+
+    function playWebNotificationChime() {
+      try {
+        var AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        if (!sharedAudioCtx) {
+          sharedAudioCtx = new AudioContext();
+        }
+        if (sharedAudioCtx.state === 'suspended') {
+          sharedAudioCtx.resume();
+        }
+        var ctx = sharedAudioCtx;
+        var now = ctx.currentTime;
+
+        // Tone 1: E5 (659.25 Hz)
+        var osc1 = ctx.createOscillator();
+        var gain1 = ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(659.25, now);
+        gain1.gain.setValueAtTime(0.3, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.35);
+
+        // Tone 2: B5 (987.77 Hz) - bright harmonic chime
+        var osc2 = ctx.createOscillator();
+        var gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(987.77, now + 0.12);
+        gain2.gain.setValueAtTime(0.35, now + 0.12);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(now + 0.12);
+        osc2.stop(now + 0.6);
+      } catch (e) {
+        console.log('Audio chime error:', e);
+      }
+    }
+    window.playWebNotificationChime = playWebNotificationChime;
+
+    // Show OS-Level System Notification (Like Facebook / LINE)
+    function showSystemNotification(title, body, icon, tag) {
+      try {
+        // 1. Play audio chime FIRST (Always works on iOS & Android & Desktop)
+        playWebNotificationChime();
+
+        // 2. Vibrate device (Android & supported browsers)
+        if (navigator.vibrate) {
+          try { navigator.vibrate([200, 100, 200]); } catch (_) {}
+        }
+
+        // 3. System Notification (Only if supported and permitted)
+        if ('Notification' in window && Notification.permission === 'granted') {
+          var iconUrl = icon || 'icons/Icon-192.png';
+          var options = {
+            body: body || '',
+            icon: iconUrl,
+            badge: 'icons/Icon-192.png',
+            vibrate: [200, 100, 200],
+            tag: tag || ('chcekname-shift-' + Date.now()),
+            renotify: true,
+            requireInteraction: false,
+            data: { url: '/' }
+          };
+
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(function(reg) {
+              if (reg && reg.showNotification) {
+                reg.showNotification(title, options);
+              } else {
+                try { new Notification(title, options); } catch (_) {}
+              }
+            }).catch(function() {
+              try { new Notification(title, options); } catch (_) {}
+            });
+          } else {
+            try { new Notification(title, options); } catch (_) {}
+          }
+        }
+      } catch (e) {
+        console.warn('showSystemNotification error:', e);
+      }
+    }
+    window.showSystemNotification = showSystemNotification;
+
+    function isIOSDevice() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+    window.isIOSDevice = isIOSDevice;
+
+    function isStandalonePWA() {
+      return (window.navigator.standalone === true) || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    }
+    window.isStandalonePWA = isStandalonePWA;
+
+    function getNotificationPermission() {
+      try {
+        if (!('Notification' in window)) return 'unsupported';
+        return Notification.permission;
+      } catch (_) {
+        return 'unsupported';
+      }
+    }
+    window.getNotificationPermission = getNotificationPermission;
+
+    function requestSystemNotificationPermission() {
+      try {
+        if (!('Notification' in window)) return Promise.resolve('unsupported');
+        return Notification.requestPermission().then(function(perm) {
+          if (perm === 'granted') {
+            playWebNotificationChime();
+            showSystemNotification('ChcekName', 'เปิดการแจ้งเตือนตารางงานเรียบร้อยแล้ว!');
+          }
+          return perm;
+        });
+      } catch (_) {
+        return Promise.resolve('denied');
+      }
+    }
+    window.requestSystemNotificationPermission = requestSystemNotificationPermission;
+
+    // Keep window scroll at 0 to prevent mobile browser coordinate shift
+    window.addEventListener('scroll', function () {
+      if (window.scrollY !== 0 || window.scrollX !== 0) {
+        window.scrollTo(0, 0);
+      }
+    });
+
+    // Fade out HTML loader as soon as Flutter renders the first frame
+    window.addEventListener('flutter-first-frame', function () {
+      var loader = document.getElementById('loading-screen');
+      if (loader) {
+        loader.style.opacity = '0';
+        loader.style.pointerEvents = 'none';
+        setTimeout(function() {
+          if (loader.parentNode) {
+            loader.parentNode.removeChild(loader);
+          }
+        }, 360);
+      }
+    });
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
